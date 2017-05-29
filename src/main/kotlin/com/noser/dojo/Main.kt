@@ -1,48 +1,59 @@
 package com.noser.dojo
 
-import io.reactivex.Observable
-import io.reactivex.Observable.*
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.toObservable
+import io.reactivex.schedulers.Schedulers.io
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import kotlin.system.exitProcess
 
+val retrofit: Retrofit = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .baseUrl("http://10.25.100.61:8080/api/")
+        .build()
+
+
+val service: RestAPI = retrofit.create(RestAPI::class.java)
 
 object Main {
     @JvmStatic fun main(args: Array<String>) {
-        println(Messager().getMessage())
 
-        // rxList()
+        val latch = CountDownLatch(1)
 
-        val retrofit = Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .baseUrl("https://api.github.com/")
-                .build()
-
-
-        val service = retrofit.create(RestAPI::class.java)
-
-        service.listRepos("unSinn")
-                .flatMap { list -> fromIterable(list) }
+        service.getNinjas()
+                .doOnNext { println("trying to get Ninjas") }
+                .observeOn(io())
+                .subscribeOn(io())
+                .timeout(100, MILLISECONDS)
+                .retry(50)
+                .flatMapIterable { it }
+                .doOnNext { println(it) }
+                .flatMap { ninja ->
+                    service.getNinja(ninja)
+                            .doOnNext { println("trying to get Ninja $ninja") }
+                            .timeout(100, MILLISECONDS)
+                            .retry(50)
+                            .observeOn(io())
+                            .doOnNext { println(it) }
+                }
+                .toList()
                 .subscribeBy(
-                        onNext = ::println,
-                        onError = { it.printStackTrace() },
-                        onComplete = { println("Done!") }
+                        onSuccess = {
+                            println(it)
+                            latch.countDown()
+                        },
+                        onError = {
+                            println("we are fucked")
+                            it.printStackTrace()
+                            exitProcess(5)
+                        }
                 )
-    }
 
-    private fun rxList() {
-        val list = listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon")
-
-        list.toObservable()
-                .filter { it.length >= 5 }
-                .repeat(2)
-                .subscribeBy(
-                        onNext = ::println,
-                        onError = { it.printStackTrace() },
-                        onComplete = { println("Done!") }
-                )
+        latch.await()
+        println("done")
     }
 }
+
