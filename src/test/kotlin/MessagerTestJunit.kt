@@ -1,4 +1,4 @@
-package com.noser.dojo
+package com.noser.hackathon
 
 
 import com.natpryce.hamkrest.assertion.assertThat

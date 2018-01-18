@@ -1,4 +1,4 @@
-package com.noser.dojo
+package com.noser.hackathon
 
 import io.kotlintest.specs.StringSpec
 import org.hamcrest.CoreMatchers.not
