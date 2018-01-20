@@ -1,23 +1,23 @@
 package com.noser.hackathon
 
 
+import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 
-/**
- * Created by fabian.maechler on 06.04.2017.
- */
 interface GameServerAPI {
 
     @GET("hackathon/ninjas")
-    fun getNinjas(): List<String>
+    fun getBoards(): Observable<Board>
 
     @GET("hackathon/ninjas/{name}")
-    fun getNinja(@Path("name") name: String): Ninja
+    fun getBoard(@Path("name") name: String): Single<Board>
 }
 
-data class Ninja(val name: String, val preferedWeapon: String)
+data class Board(val name: String, val pair: String)
+
 
 
 
