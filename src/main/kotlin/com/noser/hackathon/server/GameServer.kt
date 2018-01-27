@@ -1,0 +1,59 @@
+package com.noser.hackathon.server
+
+import com.noser.hackathon.Config.PLAYER_NAME
+import com.noser.hackathon.Config.URL
+import io.reactivex.Observable
+import okhttp3.OkHttpClient
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Repository
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.*
+
+
+@Repository
+class GameServer {
+
+    private val api: GameServerAPI
+
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
+    final val boards: Observable<Board>
+
+    init {
+
+        val okHttpClient = OkHttpClient.Builder()
+                .readTimeout(1, SECONDS)
+                .connectTimeout(1, SECONDS)
+                .build()
+
+        val retrofit: Retrofit = Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(okHttpClient)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
+                .baseUrl(URL)
+                .build()
+
+
+        api = retrofit.create(GameServerAPI::class.java)
+
+        boards = Observable.interval(5, TimeUnit.SECONDS)
+                .flatMap { api.getBoards().flatMapIterable { it } }
+                .doOnNext { log.info("Got new Board-Id $it") }
+                .flatMap { api.getBoard(it) }
+                .doOnError { log.error("Error getting Board", it) }
+
+    }
+
+    fun createBoard(enemy: String): Observable<Board> {
+        log.info("Creating Board for Enemy $enemy")
+        return api.createBoard(UUID.randomUUID().toString().substring(0, 6), BoardInfo(PLAYER_NAME, enemy, 0))
+                .doOnError { log.error("Creating Board", it) }
+    }
+
+
+}
+
