@@ -6,24 +6,30 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class GameService(val state: GameState, server: GameServer) {
+class GameService(val state: GameState, final val server: GameServer, val player: AiService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
-
     init {
-        server.createBoard("Bösewicht").subscribe()
-        server.boards.subscribe {
-            log.info("Got Board $it")
+        startGame("Bösewicht")
+        server.boards.subscribe { board ->
+            log.info("Got Board $board")
+            if (!board.boardStatus.gameFinished) {
+                val playColumn = player.calculatePlayChip(board)
+                server.play(board, playColumn)
+                        .doOnError { log.error("Creating Play on Board ${board.boardId}", it) }
+                        .subscribe()
+            }
+
         }
     }
 
-    fun start(name: String) {
-
+    final fun startGame(name: String) {
+        server.createBoard(name).subscribe()
     }
 
     fun getBoards() {
-        listOf(state.boards)
+        listOf(state.allBoards)
     }
 
 

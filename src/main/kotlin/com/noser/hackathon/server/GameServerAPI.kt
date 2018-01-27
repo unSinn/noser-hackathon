@@ -2,6 +2,7 @@ package com.noser.hackathon.server
 
 
 import io.reactivex.Observable
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -17,12 +18,19 @@ interface GameServerAPI {
     @POST("connect-four/boards/{board}")
     fun createBoard(@Path("board") board: String, @Body boardInfo: BoardInfo): Observable<Board>
 
+    @POST("connect-four/boards/{board}/{column}")
+    fun playChip(@Path("board") board: String, @Path("column") column: Int, @Body color: RequestBody): Observable<Board>
+
     @GET("connect-four/boards/{board}")
     fun getBoard(@Path("board") board: String): Observable<Board>
+}
+
+enum class Color {
+    x, o
 }
 
 data class Board(val boardId: String, val boardInfo: BoardInfo, val boardStatus: BoardStatus, val grid: List<List<String>>)
 
 data class BoardInfo(val playerX: String, val playerO: String, val round: Int)
 
-data class BoardStatus(val gameFinished: Boolean, val winner: String, val winningPosition: List<String>, val nextTurn: String)
+data class BoardStatus(val gameFinished: Boolean, val winner: String, val winningPosition: List<List<Int>>, val nextTurn: String?)

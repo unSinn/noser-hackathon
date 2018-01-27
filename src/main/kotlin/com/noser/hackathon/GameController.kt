@@ -10,7 +10,7 @@ class GameController(private val service: GameService) {
 
     @GetMapping("/start")
     fun startGame(@RequestParam(value = "name") name: String) {
-        service.start(name)
+        service.startGame(name)
     }
 
     @GetMapping("/games")

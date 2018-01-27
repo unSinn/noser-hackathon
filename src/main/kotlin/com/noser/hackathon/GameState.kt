@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class GameState {
 
-    val boards : MutableList<Board> = mutableListOf()
+    val allBoards: MutableList<Board> = mutableListOf()
 
 
 }
