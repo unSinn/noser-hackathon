@@ -43,15 +43,17 @@ class GameServer {
                 .baseUrl(URL)
                 .build()
 
-
         api = retrofit.create(GameServerAPI::class.java)
 
-        boards = Observable.interval(5, SECONDS)
+        boards = fetchBoards()
+    }
+
+    private fun fetchBoards(): Observable<Board> {
+        return Observable.interval(5, SECONDS)
                 .flatMap { api.getBoards().flatMapIterable { it } }
                 .doOnNext { log.info("Got new Board-Id $it") }
                 .flatMap { api.getBoard(it) }
                 .doOnError { log.error("Error getting Board", it) }
-
     }
 
     fun createBoard(enemy: String): Observable<Board> {
@@ -60,11 +62,11 @@ class GameServer {
                 .doOnError { log.error("Creating Board", it) }
     }
 
-    fun play(board: Board, columnIndex: Int): Observable<Board> {
-        val color: String = board.boardStatus.nextTurn ?: "x" // We play against ourselves, default Value is x
-        return api.playChip(board.boardId, columnIndex, RequestBody.create(MediaType.parse("text/plain"), color))
-                .doOnError { log.error("Error playing columne=$columnIndex on Board=${board.boardId} with Color=$color") }
-                .doOnNext { log.info("Played columne=$columnIndex on Board=${board.boardId} with Color=$color") }
+    fun play(board: Board, columnIndex: Int, color :Color): Observable<Board> {
+        val colorString: String = color.toString()
+        return api.playChip(board.boardId, columnIndex, RequestBody.create(MediaType.parse("text/plain"), colorString))
+                .doOnError { log.error("Error playing columne=$columnIndex on Board=${board.boardId} with Color=$colorString") }
+                .doOnNext { log.info("Played columne=$columnIndex on Board=${board.boardId} with Color=$colorString") }
     }
 
 

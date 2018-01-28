@@ -1,5 +1,6 @@
 package com.noser.hackathon
 
+import com.noser.hackathon.server.Color
 import com.noser.hackathon.server.GameServer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,7 +17,8 @@ class GameService(val state: GameState, final val server: GameServer, val player
             log.info("Got Board $board")
             if (!board.boardStatus.gameFinished) {
                 val playColumn = player.calculatePlayChip(board)
-                server.play(board, playColumn)
+                val color = board.boardStatus.nextTurn ?: Color.X // We play against ourselves, default Value is x
+                server.play(board, playColumn, color)
                         .doOnError { log.error("Creating Play on Board ${board.boardId}", it) }
                         .subscribe()
             }

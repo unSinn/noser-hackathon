@@ -26,11 +26,11 @@ interface GameServerAPI {
 }
 
 enum class Color {
-    x, o
+    X, O
 }
 
 data class Board(val boardId: String, val boardInfo: BoardInfo, val boardStatus: BoardStatus, val grid: List<List<String>>)
 
 data class BoardInfo(val playerX: String, val playerO: String, val round: Int)
 
-data class BoardStatus(val gameFinished: Boolean, val winner: String, val winningPosition: List<List<Int>>, val nextTurn: String?)
+data class BoardStatus(val gameFinished: Boolean, val winner: String, val winningPosition: List<List<Int>>, val nextTurn: Color?)
