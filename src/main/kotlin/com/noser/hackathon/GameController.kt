@@ -1,21 +1,22 @@
 package com.noser.hackathon
 
+import com.noser.hackathon.server.Board
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class GameController(private val service: GameService) {
+class GameController(private val state: GameState) {
 
 
     @GetMapping("/start")
     fun startGame(@RequestParam(value = "name") name: String) {
-        service.startGame(name)
+        TODO("Input for tournament?")
     }
 
-    @GetMapping("/games")
-    fun getGames() {
-        return service.getBoards()
+    @GetMapping("/gamesComputing")
+    fun getGames(): Collection<Board> {
+        return state.gamesComputing.values
     }
 
 }
