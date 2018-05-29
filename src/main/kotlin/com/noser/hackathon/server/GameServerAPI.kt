@@ -9,6 +9,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.*
 
 
 interface GameServerAPI {
@@ -59,6 +60,28 @@ data class Board(val boardId: String,
         return "$boardId ${boardInfo.playerO} vs ${boardInfo.playerX} round:${boardInfo.round} \n" +
                 "finished: ${boardStatus.gameFinished}, nextTurn: ${boardStatus.nextTurn}\n" +
                 sb.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Board
+
+        if (boardId != other.boardId) return false
+        if (boardInfo != other.boardInfo) return false
+        if (boardStatus != other.boardStatus) return false
+        if (!Arrays.equals(grid, other.grid)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = boardId.hashCode()
+        result = 31 * result + boardInfo.hashCode()
+        result = 31 * result + boardStatus.hashCode()
+        result = 31 * result + Arrays.hashCode(grid)
+        return result
     }
 }
 
