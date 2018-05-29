@@ -18,7 +18,7 @@ class AiService {
     fun calculatePlay(board: Board): Int {
         val random = (0..BOARD_WITH_MAX_INDEX).random()
         log.info("Calculating for Board ${board.boardId} ...")
-        Thread.sleep(10000)
+        //Thread.sleep(10000)
         log.info("Calculated random Play: Column $random for Board ${board.boardId}")
         return random
     }

@@ -13,7 +13,7 @@ import org.junit.Test
 
 class IntegrationTest {
 
-    val enemyName = "bot_THE_WEST"
+    val ENEMY_NAME = "bot_THE_WEST"
 
 
     private var christoph = RequestSpecBuilder()
@@ -31,23 +31,44 @@ class IntegrationTest {
             .build()
 
     @Test
-    fun useSpec() {
-        given()
-                .spec(christoph)
-                .body(Match(0, GENOSSEN, enemyName, 10))
-                .When()
-                .post("match")
-                .then()
-                .statusCode(200)
+    fun integrationTest() {
 
+        deleteBoards()
+
+        createBoards()
+
+        // startPlaying()
+
+
+    }
+
+    private fun startPlaying() {
         given()
                 .spec(genosse)
-                .param("enemy", enemyName)
+                .param("enemy", ENEMY_NAME)
                 .When()
                 .put("start")
                 .then()
                 .statusCode(200)
+    }
 
+    private fun createBoards() {
+        given()
+                .spec(christoph)
+                .body(Match(0, GENOSSEN, ENEMY_NAME, 10))
+                .When()
+                .post("match")
+                .then()
+                .statusCode(200)
+    }
 
+    private fun deleteBoards() {
+        given()
+                .spec(christoph)
+                .body("i want to delete everything")
+                .When()
+                .delete("boards")
+                .then()
+                .statusCode(204)
     }
 }
