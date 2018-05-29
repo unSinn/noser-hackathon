@@ -23,7 +23,6 @@ class GameService(val state: GameState, val server: GameServer, val player: AiSe
 
 
     init {
-        startGame("Bösewicht")
         server.boards
                 .observeOn(STATS_POOL)
                 .doOnNext { state.setComputing(it) }
@@ -56,10 +55,6 @@ class GameService(val state: GameState, val server: GameServer, val player: AiSe
                             }
                         }
                 )
-    }
-
-    final fun startGame(name: String) {
-        server.createBoard(name).subscribe()
     }
 
 }

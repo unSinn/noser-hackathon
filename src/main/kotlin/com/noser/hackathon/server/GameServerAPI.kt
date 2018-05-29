@@ -19,10 +19,13 @@ interface GameServerAPI {
     fun getOpenBoards(@Path("team") team: String): Observable<List<String>>
 
     @POST("connect-four/boards/{board}")
-    fun createBoard(@Path("board") board: String, @Body boardInfo: BoardInfo): Observable<Board>
+    fun createBoard(@Path("board") board: String,
+                    @Body boardInfo: BoardInfo): Observable<Board>
 
     @POST("connect-four/boards/{board}/{column}")
-    fun playChip(@Path("board") board: String, @Path("column") column: Int, @Body color: RequestBody): Observable<Board>
+    fun playChip(@Path("board") board: String,
+                 @Path("column") column: Int,
+                 @Body color: RequestBody): Observable<Board>
 
     @GET("connect-four/boards/{board}")
     fun getBoard(@Path("board") board: String): Observable<Board>
@@ -37,10 +40,21 @@ enum class Color {
     X, O
 }
 
-data class Board(val boardId: String, val boardInfo: BoardInfo, val boardStatus: BoardStatus, val grid: List<List<String>>)
+data class Board(val boardId: String,
+                 val boardInfo: BoardInfo,
+                 val boardStatus: BoardStatus,
+                 val grid: List<List<String>>)
 
-data class BoardInfo(val playerX: String, val playerO: String, val round: Int)
+data class BoardInfo(val playerX: String,
+                     val playerO: String,
+                     val round: Int)
 
-data class BoardStatus(val gameFinished: Boolean, val winner: String, val winningPosition: List<List<Int>>, val nextTurn: Color?)
+data class BoardStatus(val gameFinished: Boolean,
+                       val winner: String,
+                       val winningPosition: List<List<Int>>,
+                       val nextTurn: Color?)
 
-data class Match(val round: Int, val team1: String, val team2: String, val matches: Int)
+data class Match(val round: Int,
+                 val team1: String,
+                 val team2: String,
+                 val matches: Int)

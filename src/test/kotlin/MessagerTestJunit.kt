@@ -13,9 +13,19 @@ import org.junit.Test
 
 class IntegrationTest {
 
-    private var spec = RequestSpecBuilder()
+    val enemyName = "bot_THE_WEST"
+
+
+    private var christoph = RequestSpecBuilder()
             .setContentType(JSON)
             .setBaseUri("http://localhost:8080/api/connect-four")
+            .addFilter(ResponseLoggingFilter())//log request and response for better debugging. You can also only log if a requests fails.
+            .addFilter(RequestLoggingFilter())
+            .build()
+
+    private var genosse = RequestSpecBuilder()
+            .setContentType(JSON)
+            .setBaseUri("http://localhost:8000/")
             .addFilter(ResponseLoggingFilter())//log request and response for better debugging. You can also only log if a requests fails.
             .addFilter(RequestLoggingFilter())
             .build()
@@ -23,11 +33,21 @@ class IntegrationTest {
     @Test
     fun useSpec() {
         given()
-                .spec(spec)
-                .body(Match(0, GENOSSEN, "THE_WEST", 10))
+                .spec(christoph)
+                .body(Match(0, GENOSSEN, enemyName, 10))
                 .When()
                 .post("match")
                 .then()
                 .statusCode(200)
+
+        given()
+                .spec(genosse)
+                .param("enemy", enemyName)
+                .When()
+                .put("start")
+                .then()
+                .statusCode(200)
+
+
     }
 }
