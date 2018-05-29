@@ -7,6 +7,7 @@ import io.reactivex.Observable
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
+import okhttp3.RequestBody.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
@@ -56,15 +57,10 @@ class GameServer {
                 .doOnError { log.error("Error getting Board", it) }
     }
 
-    fun createBoard(enemy: String): Observable<Board> {
-        log.info("Creating Board for Enemy $enemy")
-        return api.createBoard(UUID.randomUUID().toString().substring(0, 6), BoardInfo(GENOSSEN, enemy, 0))
-                .doOnError { log.error("Creating Board", it) }
-    }
-
     fun play(board: Board, columnIndex: Int, color: Color): Observable<Board> {
         val colorString: String = color.toString()
-        return api.playChip(board.boardId, columnIndex, RequestBody.create(MediaType.parse("text/plain"), colorString))
+        return api
+                .playChip(board.boardId, columnIndex, create(MediaType.parse("text/plain"), colorString))
                 .doOnNext { log.info("Played columne=$columnIndex on Board=${board.boardId} with Color=$colorString") }
     }
 
