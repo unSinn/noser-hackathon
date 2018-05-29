@@ -45,7 +45,7 @@ enum class Color {
 data class Board(val boardId: String,
                  val boardInfo: BoardInfo,
                  val boardStatus: BoardStatus,
-                 val grid: List<List<String>>) {
+                 val grid: Array<Array<String>>) {
     override fun toString(): String {
         val sb = StringBuilder()
 
