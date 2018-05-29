@@ -17,7 +17,7 @@ import retrofit2.adapter.rxjava2.Result.response
 
 
 @Service
-class GameService(val state: GameState, final val server: GameServer, val player: AiService) {
+class GameService(val state: GameState, val server: GameServer, val player: AiService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -26,7 +26,6 @@ class GameService(val state: GameState, final val server: GameServer, val player
         startGame("Bösewicht")
         server.boards
                 .observeOn(STATS_POOL)
-                .filter { !it.boardStatus.gameFinished } // TODO: also filter only our turn
                 .doOnNext { state.setComputing(it) }
                 .subscribe { board ->
                     computeParalell(board)

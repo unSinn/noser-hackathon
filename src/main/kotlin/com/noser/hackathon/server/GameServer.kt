@@ -1,6 +1,7 @@
 package com.noser.hackathon.server
 
-import com.noser.hackathon.Config.PLAYER_NAME
+import com.noser.hackathon.Config
+import com.noser.hackathon.Config.GENOSSEN
 import com.noser.hackathon.Config.URL
 import io.reactivex.Observable
 import okhttp3.MediaType
@@ -50,14 +51,14 @@ class GameServer {
 
     private fun fetchBoards(): Observable<Board> {
         return Observable.interval(1, SECONDS)
-                .flatMap { api.getBoards().flatMapIterable { it } }
+                .flatMap { api.getOpenBoards(Config.GENOSSEN).flatMapIterable { it } }
                 .flatMap { api.getBoard(it) }
                 .doOnError { log.error("Error getting Board", it) }
     }
 
     fun createBoard(enemy: String): Observable<Board> {
         log.info("Creating Board for Enemy $enemy")
-        return api.createBoard(UUID.randomUUID().toString().substring(0, 6), BoardInfo(PLAYER_NAME, enemy, 0))
+        return api.createBoard(UUID.randomUUID().toString().substring(0, 6), BoardInfo(GENOSSEN, enemy, 0))
                 .doOnError { log.error("Creating Board", it) }
     }
 
