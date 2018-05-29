@@ -1,6 +1,8 @@
 package com.noser.hackathon.server
 
 
+import com.noser.hackathon.Config.BOARD_HEIGHT
+import com.noser.hackathon.Config.BOARD_WITH
 import io.reactivex.Observable
 import okhttp3.RequestBody
 import retrofit2.http.Body
@@ -43,7 +45,22 @@ enum class Color {
 data class Board(val boardId: String,
                  val boardInfo: BoardInfo,
                  val boardStatus: BoardStatus,
-                 val grid: List<List<String>>)
+                 val grid: List<List<String>>) {
+    override fun toString(): String {
+        val sb = StringBuilder()
+
+        for (row in BOARD_HEIGHT - 1 downTo 0) {
+            for (column in 0 until BOARD_WITH) {
+                sb.append(grid[column][row])
+            }
+            sb.append("\n")
+        }
+
+        return "$boardId ${boardInfo.playerO} vs ${boardInfo.playerX} round:${boardInfo.round} \n" +
+                "finished: ${boardStatus.gameFinished}, nextTurn: ${boardStatus.nextTurn}\n" +
+                sb.toString()
+    }
+}
 
 data class BoardInfo(val playerX: String,
                      val playerO: String,
