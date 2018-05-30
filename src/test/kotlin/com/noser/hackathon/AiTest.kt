@@ -24,7 +24,7 @@ class AiTest {
                      |       ,
                      |       ,
                 """.trimMargin(), info, status)
-        assert( -1 == ai.calculatePlay(b))
+        assert(-1 == ai.calculatePlay(b, color))
     }
 
     @Test
@@ -37,7 +37,7 @@ class AiTest {
                      |OOXOXOX
                      |OXOXOXO
                 """.trimMargin(), info, status)
-        assert( -1 == ai.calculatePlay(b))
+        assert(-1 == ai.calculatePlay(b, color))
     }
 
     @Test
@@ -50,7 +50,7 @@ class AiTest {
                      |OXXOXOX
                      |OXOXOXO
                 """.trimMargin(), info, status)
-        assert( 1 == ai.calculatePlay(b))
+        assert(1 == ai.calculatePlay(b, color))
     }
 
     @Test

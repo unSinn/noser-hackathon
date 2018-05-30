@@ -18,7 +18,8 @@ class IntegrationTest {
 
     private var christoph = RequestSpecBuilder()
             .setContentType(JSON)
-            .setBaseUri("http://localhost:8080/api/connect-four")
+            .setBaseUri("https://noser-connect-four.azurewebsites.net/api/connect-four")
+            // .setBaseUri("http://localhost:8080/api/connect-four")
             .addFilter(ResponseLoggingFilter())//log request and response for better debugging. You can also only log if a requests fails.
             .addFilter(RequestLoggingFilter())
             .build()

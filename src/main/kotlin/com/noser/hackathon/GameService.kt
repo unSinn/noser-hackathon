@@ -7,13 +7,9 @@ import com.noser.hackathon.server.Color
 import com.noser.hackathon.server.GameServer
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import okhttp3.internal.Util.threadFactory
 import retrofit2.HttpException
-import java.util.concurrent.Executors.newFixedThreadPool
-import retrofit2.adapter.rxjava2.Result.response
 
 
 @Service
@@ -41,7 +37,7 @@ class GameService(val state: GameState, val server: GameServer, val player: AiSe
     private fun computePlay(board: Board) {
         log.info("Got playable Board $board")
         val color = board.boardStatus.nextTurn ?: Color.X // We play against ourselves, default Value is x
-        val playColumn = player.calculatePlay(board)
+        val playColumn = player.calculatePlay(board, color)
         server.play(board, playColumn, color)
                 .observeOn(STATS_POOL)
                 .subscribeBy(
