@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.3'
 
 volumes:
     prometheus_data: {}
@@ -20,7 +20,10 @@ services:
       - '--storage.tsdb.retention=200h'
       - '--web.enable-lifecycle'
     ports:
-      - 9090:9090
+      - target: 9090
+        published: 9090
+        protocol: tcp
+        mode: host
 
 
   grafana:
@@ -38,4 +41,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
-      - 3000:3000
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
