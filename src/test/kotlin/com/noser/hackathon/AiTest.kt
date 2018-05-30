@@ -1,7 +1,5 @@
 package com.noser.hackathon
 
-import com.noser.hackathon.Config.BOARD_HEIGHT
-import com.noser.hackathon.Config.BOARD_WITH
 import com.noser.hackathon.server.Board
 import com.noser.hackathon.server.BoardInfo
 import com.noser.hackathon.server.BoardStatus
@@ -18,32 +16,15 @@ class AiTest {
 
     @Test
     fun testEmptyBoard() {
-
-        val board = """
+        val b = Board.fromString("""
                      |XXXXXXX
                      |OXOXOXO
                      |OOXOXOX
                      |OXOXOXO
                      |OOXOXOX
                      |OXOXOXO
-                """.trimMargin()
-
-        val lines = board.split("\n")
-        val grid = lines.map { l -> l.split("") }
-
-
-        val flipped = Array(BOARD_WITH) { Array(BOARD_HEIGHT) { "-" } }
-
-        for (row in 0 until BOARD_HEIGHT) {
-            for (column in 0 until Config.BOARD_WITH) {
-                flipped[column][row] = grid[BOARD_HEIGHT - 1 - row][column + 1]
-            }
-        }
-
-
-        val b = Board("id", info, status, flipped)
-        println(b)
-
+                """.trimMargin(), info, status)
+        ai.calculatePlay(b)
     }
 
 }

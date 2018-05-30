@@ -1,6 +1,7 @@
 package com.noser.hackathon.server
 
 
+import com.noser.hackathon.Config
 import com.noser.hackathon.Config.BOARD_HEIGHT
 import com.noser.hackathon.Config.BOARD_WITH
 import io.reactivex.Observable
@@ -47,6 +48,24 @@ data class Board(val boardId: String,
                  val boardInfo: BoardInfo,
                  val boardStatus: BoardStatus,
                  val grid: Array<Array<String>>) {
+    companion object {
+        fun fromString(s: String, info: BoardInfo, status: BoardStatus): Board {
+            val lines = s.split("\n")
+            val grid = lines.map { l -> l.split("") }
+
+
+            val flipped = Array(BOARD_WITH) { Array(BOARD_HEIGHT) { "-" } }
+
+            for (row in 0 until BOARD_HEIGHT) {
+                for (column in 0 until Config.BOARD_WITH) {
+                    flipped[column][row] = grid[BOARD_HEIGHT - 1 - row][column + 1]
+                }
+            }
+
+
+            return Board("id", info, status, flipped)
+        }
+    }
     override fun toString(): String {
         val sb = StringBuilder()
 
