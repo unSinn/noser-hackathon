@@ -11,8 +11,8 @@ object Config {
     val BOARD_HEIGHT = 6
 
     val GENOSSEN = "Genossen"
-    //val URL = "https://noser-connect-four.azurewebsites.net/api/"
-    val URL = "http://localhost:8080/api/"
+    val URL = "https://noser-connect-four.azurewebsites.net/api/"
+    //val URL = "http://localhost:8080/api/"
 
     val STATS_POOL = Schedulers.from(newFixedThreadPool(1, threadFactory("StatSched-", true)))
     val COMPUTATION_POOL = Schedulers.from(newFixedThreadPool(8, threadFactory("ComputationSched-", true)))
