@@ -17,6 +17,19 @@ class AiTest {
     @Test
     fun testEmptyBoard() {
         val b = Board.fromString("""
+                     |       ,
+                     |       ,
+                     |       ,
+                     |       ,
+                     |       ,
+                     |       ,
+                """.trimMargin(), info, status)
+        assert( -1 == ai.calculatePlay(b))
+    }
+
+    @Test
+    fun testFullBoard() {
+        val b = Board.fromString("""
                      |XXXXXXX
                      |OXOXOXO
                      |OOXOXOX
@@ -24,7 +37,19 @@ class AiTest {
                      |OOXOXOX
                      |OXOXOXO
                 """.trimMargin(), info, status)
-        ai.calculatePlay(b)
+        assert( -1 == ai.calculatePlay(b))
     }
 
+    @Test
+    fun test3InColumnBoard() {
+        val b = Board.fromString("""
+                     |       ,
+                     |       ,
+                     |  XOXOX
+                     |OXOXOXO
+                     |OXXOXOX
+                     |OXOXOXO
+                """.trimMargin(), info, status)
+        assert( 1 == ai.calculatePlay(b))
+    }
 }
