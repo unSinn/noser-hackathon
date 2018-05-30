@@ -20,8 +20,11 @@ class AiService {
         log.info("Calculating for Board ${board.boardId} ...")
 
 
-        // getRandomAvailableColumn(board)
-        return calculate("X", board)
+        var index = calculate("X", board)
+
+        if(index < 0){
+            return getRandomAvailableColumn()
+        }
     }
 
     fun getRandomAvailableColumn(board: Board): Int {
@@ -86,4 +89,80 @@ class AiService {
         return scoreList
     }
 
+    fun findInRow(color: String, board: Board): Array<Int> {
+        var count = 0
+        var spaceCount = 0
+        var scoreList = Array(Config.BOARD_WITH, {i -> 0} )
+        var rowScoreList = Array(Config.BOARD_HEIGHT, { i -> 0})
+        var rowInfoList = Array(Config.BOARD_HEIGHT, { i -> RowInfo(0, 0, 0, 0, 0)})
+        var spaceCountBefore = 0
+        var spaceCountAfter = 0
+        var spaceCountMiddle = 0
+        var startIndex = -1
+
+        for(rowIndex in 0 until Config.BOARD_HEIGHT) {
+            for(columnIndex in 0 until Config.BOARD_WITH) {
+                val currentColor = board.grid[columnIndex][rowIndex]
+                if(currentColor == color) {
+                    count++
+                    if(spaceCountAfter > 0){
+                        // we found the color again, swap 'After' and 'Middle'
+                        spaceCountMiddle = spaceCountAfter
+                        spaceCountAfter = 0
+                    }
+                } else if(currentColor.isBlank()) {
+                    if(hasBottomCoin(columnIndex, rowIndex, board)) {
+                        if (count <= 0) {
+                            spaceCountBefore++
+                        } else {
+                            spaceCountAfter++
+                        }
+                    }
+                } else {
+                    // other color
+                    val width = spaceCountBefore + spaceCountMiddle + spaceCountAfter + count
+                    if(width >= 4){
+                        val verticalScore = count
+                        if( rowScoreList[rowIndex] < verticalScore){
+                            rowScoreList[rowIndex] = verticalScore
+                            rowInfoList[rowIndex].startIndex = columnIndex - width
+                            rowInfoList[rowIndex].spaceCountBefore = spaceCountBefore
+                            rowInfoList[rowIndex].spaceCountMiddle = spaceCountMiddle
+                            rowInfoList[rowIndex].spaceCountAfter = spaceCountAfter
+                            rowInfoList[rowIndex].count = count
+                        }
+                    }
+
+                    spaceCountBefore = 0
+                    spaceCountMiddle = 0
+                    spaceCountAfter = 0
+                    count = 0
+                }
+            }
+        }
+
+        var max = rowScoreList.max()
+        var rowIndex = rowScoreList.indexOf(max)
+
+        var rowInfo = rowInfoList[rowIndex]
+
+        var colIndex = 0
+        if(rowInfo.spaceCountMiddle == 1) {
+            colIndex = rowInfo.startIndex + rowInfo.spaceCountBefore
+        }
+
+        scoreList[colIndex] = rowScoreList[rowIndex];
+        return scoreList
+    }
+
+    fun hasBottomCoin(columnIndex: Int, rowIndex: Int, board: Board): Boolean {
+        return rowIndex >= 1 && !board.grid[columnIndex][rowIndex-1].isBlank()
+    }
+
 }
+
+data class RowInfo(var startIndex: Int,
+                 var spaceCountBefore: Int,
+                 var spaceCountMiddle: Int,
+                   var spaceCountAfter: Int,
+                   var count: Int)

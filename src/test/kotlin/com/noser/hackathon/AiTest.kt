@@ -52,4 +52,17 @@ class AiTest {
                 """.trimMargin(), info, status)
         assert( 1 == ai.calculatePlay(b))
     }
+
+    @Test
+    fun testFindHorizontal() {
+        val b = Board.fromString("""
+                     |       ,
+                     |       ,
+                     |       ,
+                     | XXX OO,
+                     |OXOOXOX
+                     |OXOXOXO
+                """.trimMargin(), info, status)
+        ai.findInRow("X", b)
+    }
 }
