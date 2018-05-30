@@ -45,3 +45,12 @@ services:
         published: 3000
         protocol: tcp
         mode: host
+
+
+  noser-hackathon:
+    image: com.noser/hackathon:1
+    ports:
+      - target: 8000
+        published: 8000
+        protocol: tcp
+        mode: host

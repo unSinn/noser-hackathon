@@ -2,7 +2,8 @@
 # Start the Game Server (Docker)
 docker run -p 8080:8080 suterchristoph1/connect-four:latest
 
-
+# Build the Genossen Docker Service
+clean build buildDocker
 
 # Start Prometheus/Grafana
 Temporary:
