@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.min
 
 
 fun ClosedRange<Int>.random() =
@@ -53,16 +54,38 @@ class AiService {
     }
 
     fun calculate(color: String, board: Board): Int {
-        // find 3 in a column of our own color
-        var scores = findAmountInColumn(color, board, 3)
-        if (scores.max() == 3) {
-            return scores.indexOf(3)
+        var enemyColor = Color.O.toString()
+        if(color.equals( Color.O.toString() )) {
+            enemyColor = Color.X.toString()
+        }
+        var rowScores = findInRow(color, board)
+        var enemyRowScores = findInRow(enemyColor, board)
+        var columnScores = findAmountInColumn(color, board)
+        var enemyColumnScores = findAmountInColumn(enemyColor, board)
+
+        // find winning columns
+        for(score in 3 downTo 1) {
+            if (rowScores.max() == score) {
+                return rowScores.indexOf(score)
+            }
+            if (columnScores.max() == score) {
+                return columnScores.indexOf(score)
+            }
+
+            // find enemy winning columns
+            if (enemyRowScores.max() == score) {
+                return enemyRowScores.indexOf(score)
+            }
+            if (enemyColumnScores.max() == score) {
+                return enemyColumnScores.indexOf(score)
+            }
         }
 
         return -1
+
     }
 
-    fun findAmountInColumn(color: String, board: Board, amount: Int): Array<Int> {
+    fun findAmountInColumn(color: String, board: Board): Array<Int> {
         var count = 0
         var scoreList = Array(Config.BOARD_WITH, { i -> 0 })
 
@@ -94,78 +117,87 @@ class AiService {
 
     fun findInRow(color: String, board: Board): Array<Int> {
         var count = 0
-        var spaceCount = 0
         var scoreList = Array(Config.BOARD_WITH, { i -> 0 })
         var rowScoreList = Array(Config.BOARD_HEIGHT, { i -> 0 })
-        var rowInfoList = Array(Config.BOARD_HEIGHT, { i -> RowInfo(0, 0, 0, 0, 0) })
-        var spaceCountBefore = 0
-        var spaceCountAfter = 0
-        var spaceCountMiddle = 0
-        var startIndex = -1
+        var rowInfoList = Array(Config.BOARD_HEIGHT, { i -> RowInfo(0, 0, 0, 0) })
+
 
         for (rowIndex in 0 until Config.BOARD_HEIGHT) {
+
+            // create a string of the row for using regex
+            var row = ""
             for (columnIndex in 0 until Config.BOARD_WITH) {
                 val currentColor = board.grid[columnIndex][rowIndex]
-                if (currentColor == color) {
-                    count++
-                    if (spaceCountAfter > 0) {
-                        // we found the color again, swap 'After' and 'Middle'
-                        spaceCountMiddle = spaceCountAfter
-                        spaceCountAfter = 0
-                    }
-                } else if (currentColor.isBlank()) {
-                    if (hasBottomCoin(columnIndex, rowIndex, board)) {
-                        if (count <= 0) {
-                            spaceCountBefore++
-                        } else {
-                            spaceCountAfter++
-                        }
-                    }
-                } else {
-                    // other color
-                    val width = spaceCountBefore + spaceCountMiddle + spaceCountAfter + count
-                    if (width >= 4) {
-                        val verticalScore = count
-                        if (rowScoreList[rowIndex] < verticalScore) {
-                            rowScoreList[rowIndex] = verticalScore
-                            rowInfoList[rowIndex].startIndex = columnIndex - width
-                            rowInfoList[rowIndex].spaceCountBefore = spaceCountBefore
-                            rowInfoList[rowIndex].spaceCountMiddle = spaceCountMiddle
-                            rowInfoList[rowIndex].spaceCountAfter = spaceCountAfter
-                            rowInfoList[rowIndex].count = count
-                        }
-                    }
+                row += currentColor
+            }
 
-                    spaceCountBefore = 0
-                    spaceCountMiddle = 0
-                    spaceCountAfter = 0
-                    count = 0
+            log.info(row)
+
+            var beginningSpaceRegex = Regex("(\\s+)($color+)\\s*")
+            var middleSpaceRegex = Regex("($color+)(\\s+)($color+)")
+            var endingSpaceRegex = Regex("($color+)(\\s+)")
+
+            var startIndex = 0
+
+            if(beginningSpaceRegex.containsMatchIn(row)) {
+                beginningSpaceRegex.findAll(row, startIndex).forEach { matchResult ->
+                    var groupValues = matchResult.groupValues
+
+                    var spaceCount = groupValues[1].length
+                    var coinsCount = groupValues[2].length
+
+                    var index = matchResult.range.start + spaceCount - 1 // left of the coins
+                    var score = coinsCount
+                    var width = matchResult.range.endInclusive - matchResult.range.start + 1
+                    if(score > scoreList[index] && width >= 4 && hasBottomCoin(index, rowIndex, board)){
+                        scoreList[index] = score
+                    }
+                }
+            }
+
+            if(middleSpaceRegex.containsMatchIn(row)) {
+                middleSpaceRegex.findAll(row, startIndex).forEach { matchResult ->
+                    var groupValues = matchResult.groupValues
+                    var coinsCount = groupValues[1].length + groupValues[3].length
+                    var spaceCount = groupValues[2].length
+
+                    var score = min(3, coinsCount) - (spaceCount - 1)
+                    var index = matchResult.range.start + groupValues[1].length // right of the left coins group
+                    var width = matchResult.range.endInclusive - matchResult.range.start + 1
+
+                    if(score > scoreList[index] && width >= 4 && hasBottomCoin(index, rowIndex, board)){
+                        scoreList[index] = score
+                    }
+                }
+            }
+
+            if(endingSpaceRegex.containsMatchIn(row)) {
+                endingSpaceRegex.findAll(row, startIndex).forEach { matchResult ->
+                    var groupValues = matchResult.groupValues
+                    var spaceCount = groupValues[2].length
+                    var coinsCount = groupValues[1].length
+
+                    var score = coinsCount
+                    var index = matchResult.range.start + coinsCount // right of the coins
+                    var width = matchResult.range.endInclusive - matchResult.range.start + 1
+
+                    if(score > scoreList[index] && width >= 4 && hasBottomCoin(index, rowIndex, board)){
+                        scoreList[index] = score
+                    }
                 }
             }
         }
 
-        var max = rowScoreList.max()
-        var rowIndex = rowScoreList.indexOf(max)
-
-        var rowInfo = rowInfoList[rowIndex]
-
-        var colIndex = 0
-        if (rowInfo.spaceCountMiddle == 1) {
-            colIndex = rowInfo.startIndex + rowInfo.spaceCountBefore
-        }
-
-        scoreList[colIndex] = rowScoreList[rowIndex];
         return scoreList
     }
 
     fun hasBottomCoin(columnIndex: Int, rowIndex: Int, board: Board): Boolean {
-        return rowIndex >= 1 && !board.grid[columnIndex][rowIndex - 1].isBlank()
+        return rowIndex == 0 || !board.grid[columnIndex][rowIndex - 1].isBlank()
     }
 
 }
 
 data class RowInfo(var startIndex: Int,
-                   var spaceCountBefore: Int,
-                   var spaceCountMiddle: Int,
-                   var spaceCountAfter: Int,
+                   var drawColIndex: Int,
+                   var score: Int,
                    var count: Int)
